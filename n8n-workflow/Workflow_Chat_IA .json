@@ -1,0 +1,133 @@
+{
+  "name": "Workflow Chat IA",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "webhook-imoveis",
+        "options": {
+          "responseData": "allEntries"
+        }
+      },
+      "id": "c6d9c325-0328-491a-be35-b39da1b8ddda",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "position": [260, 20],
+      "typeVersion": 2,
+      "webhookId": "ee160f11-fded-4789-8876-b7baff9efa85"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"llama-3.1-8b-instant\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": {{$json[\"mensagem\"]}}\n    }\n  ]\n}",
+        "options": {}
+      },
+      "id": "a8505efc-8e5b-484a-bd50-e1e337f11ab4",
+      "name": "Processar com IA",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [460, 20],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse da resposta da IA\n// Supondo que a resposta vem em item.json.choices[0].message.content\nconst resposta = $json.choices[0].message.content;\nlet filtros = {};\ntry {\n  filtros = JSON.parse(resposta);\n} catch (e) {\n  // fallback: tenta extrair com regex se não vier JSON\n}\nconst params = [];\nif (filtros.tipo) params.push(`type=${encodeURIComponent(filtros.tipo)}`);\nif (filtros.min) params.push(`minPrice=${filtros.min}`);\nif (filtros.max) params.push(`maxPrice=${filtros.max}`);\nconst query = params.length ? `?${params.join('&')}` : '';\nreturn [{ json: { query, filtros } }];"
+      },
+      "id": "97442e2b-f0cb-4833-86c4-33f40ce53cfc",
+      "name": "Preparar Parâmetros",
+      "type": "n8n-nodes-base.code",
+      "position": [660, 20],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:3024/properties{{$json[\"query\"]}}",
+        "options": {}
+      },
+      "id": "7fc9abe9-8145-4b86-91a9-3bec07ef1a88",
+      "name": "Buscar Imóveis",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [860, 20],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "jsCode": "// Espera array de imóveis em item.json\nconst imoveis = $json;\nif (!Array.isArray(imoveis) || imoveis.length === 0) {\n  return [{ json: { resposta: 'Nenhum imóvel encontrado com os filtros informados.' } }];\n}\nconst resposta = imoveis.map(imovel =>\n  `🏠 ${imovel.title}\\n📍 ${imovel.address}\\n💵 R$ ${imovel.price}\\n🏷️ ${imovel.type}`\n).join('\\n\\n');\nreturn [{ json: { resposta } }];"
+      },
+      "id": "01d8cabf-cb15-422d-8689-29b11efc6dcb",
+      "name": "Formatar Resposta",
+      "type": "n8n-nodes-base.code",
+      "position": [1060, 20],
+      "typeVersion": 2
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Processar com IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Processar com IA": {
+      "main": [
+        [
+          {
+            "node": "Preparar Parâmetros",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Parâmetros": {
+      "main": [
+        [
+          {
+            "node": "Buscar Imóveis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Imóveis": {
+      "main": [
+        [
+          {
+            "node": "Formatar Resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "bc0701f5-4fbd-4dc1-b157-93778ec52033",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8e42d0d387dd00641c2cea3eee7a0d9cdad45bfacb811bddc4d613eccffbabc8"
+  },
+  "id": "4A3Z2na4l5FiObzl",
+  "tags": []
+}

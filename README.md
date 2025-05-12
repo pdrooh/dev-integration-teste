@@ -1,38 +1,50 @@
-# Teste Leek Soluções: Vaga Desenvolvedor de Integrações
+# Teste Leek Soluções: Desenvolvedor de Integrações
 
-Segue abaixo as instruções para execução do teste técnico.
+Este projeto implementa uma API RESTful para uma imobiliária com NestJS e um chatbot para interação com a API usando N8N.
 
----
+## Estrutura do Projeto
 
-### Instruções
+```
+leek-imoveis/
+├── api/                  # Backend com NestJS
+│   ├── src/
+│   │   ├── main.ts
+│   │   ├── app.module.ts
+│   │   ├── properties/   # Módulo de imóveis
+│   │   │   ├── dto/
+│   │   │   ├── entities/
+│   │   │   ├── properties.controller.ts
+│   │   │   ├── properties.module.ts
+│   │   │   └── properties.service.ts
+│   ├── Dockerfile
+│   └── .env
+├── n8n-workflow/         # Workflow do N8N exportado
+│   ├── Workflow_Chat_IA .json
+│
+├── docker-compose.yml    # Para rodar API e banco de dados
+└── README.md             # Documentação do projeto
+```
 
-1. **Faça um fork deste repositório** para a sua conta pessoal do GitHub.
-2. **Desenvolva a aplicação** conforme as especificações técnicas abaixo.
-3. **Crie um README** com as instruções para compilar, testar e rodar o projeto.
-4. O link do repositório deverá ser enviado para os e-mails:  
-   **gabriel@leeksolucoes.com.br**,  
-   **igor.albuquerque@leeksolucoes.com.br**,  
-   **joao.marcelino@leeksolucoes.com.br**  
-   com o título: **Teste Vaga Desenvolvedor de Integrações**.
+## Parte 1: API com NestJS
 
----
+### Tecnologias Utilizadas
 
-## Parte 1 – API com NestJS
+- NestJS como framework backend
+- TypeORM como ORM
+- PostgreSQL como banco de dados
+- Swagger para documentação da API
+- Docker para containerização
 
-### Objetivo
-Criar uma API RESTful para uma imobiliária, com cadastro e listagem de imóveis.
+### Funcionalidades Implementadas
 
-### Funcionalidades
+- CRUD completo de imóveis
+- Filtros por faixa de preço e tipo de imóvel
+- Validação de dados com class-validator
+- Documentação completa com Swagger
 
-- **Cadastro de imóvel**
-- **Listagem de imóveis**
-  - Permitir **filtro por faixa de preço**
-  - Permitir **filtro por tipo de imóvel**
-- **Documentação com Swagger**
+### Entidade Property
 
-### Estrutura sugerida da entidade `Property`:
-
-```ts
+```typescript
 {
   id: string (UUID),
   title: string,
@@ -44,68 +56,95 @@ Criar uma API RESTful para uma imobiliária, com cadastro e listagem de imóveis
 }
 ```
 
-### Requisitos
+### Endpoints da API
 
-- Framework: **NestJS**
-- Banco de dados: PostgreSQL, SQLite ou MongoDB
-- Validação de dados
-- Organização modular
-- Documentação API com **Swagger**
+- `GET /properties` - Listar imóveis (com filtros opcionais)
+- `GET /properties/:id` - Buscar imóvel por ID
+- `POST /properties` - Criar novo imóvel
+- `PATCH /properties/:id` - Atualizar imóvel
+- `DELETE /properties/:id` - Remover imóvel
 
-### Pontos Extras
+## Parte 2: Integração com N8N
 
-- Uso de ORM
-- Dockerização (Dockerfile + docker-compose)
+### Funcionalidades do Chatbot
 
----
+- Saudação inicial ao usuário
+- Interpretação de linguagem natural para extrair preferências do usuário
+- Consulta à API com filtros baseados nas preferências
+- Apresentação formatada dos resultados
 
-## Parte 2 – Integração com N8N
+### Versão com IA (Opcional)
 
-### Objetivo
-Criar um **workflow no N8N** que consuma a API criada na Parte 1 e simule um chatbot que liste imóveis com base em uma faixa de valor e tipo de imóvel solicitado.
+- Utiliza a API da Groq para melhorar a interpretação das mensagens
+- Formata as respostas de maneira mais natural e amigável
 
-### Funcionalidade esperada
+## Instruções de Instalação e Execução
 
-- O usuário entra em contato e recebe uma saudação da imobiliária
-- O usuário envia um valor (ex: "Quero imóveis até R$ 400.000")
-- O usuário envia um tipo de imóvel (ex: "Quero um apartamento")
-- O workflow chama a API com o filtro de preço e tipo
-- O bot responde com uma listagem formatada dos imóveis
-- O filtro de preço ou tipo devem ser opcionais
+### Pré-requisitos
 
-### Requisitos
+- Docker e Docker Compose
+- Node.js (para desenvolvimento local)
 
-- Criar o fluxo no N8N usando o **HTTP Request Node** para chamadas API
-- Receber os dados pelo trigger de **Chat** interno do N8N
-- Retornar as informações formatadas para o usuário
+### Instalação e Execução com Docker
 
-### Ponto Extra com IA
+1. Clone o repositório:
 
-Você pode utilizar uma **API de LLM gratuita** (como a [groq.com](https://groq.com)) e o nó de **Agent** do N8N para criar um bot mais fluído e otimizado com a IA.
+   ```bash
+   git clone https://github.com/seu-usuario/leek-imoveis.git
+   cd leek-imoveis
+   ```
 
----
+2. Execute o projeto com Docker Compose:
 
-## O que será avaliado
+   ```bash
+   docker-compose up -d
+   ```
 
-| Pontos |
-|---------|
-| Organização e boas práticas no backend NestJS |
-| Funcionamento e clareza da integração no N8N |
-| Validações, tratamento de erros, estrutura dos DTOs |
-| Uso correto do Swagger e documentação |
-| Diferenciais (Docker, IA, testes) |
+3. Acesse:
+   - API: http://localhost:3024/api (Swagger)
+   - N8N: http://localhost:5678
 
----
+### Instalação e Execução Local (Desenvolvimento)
 
-## Entregáveis
+1. Configure o banco de dados PostgreSQL:
 
-- Link do repositório no GitHub com:
-  - Código-fonte da API
-  - Arquivo `.json` exportado do workflow do N8N
-  - README com:
-    - Instruções de instalação e execução da API
-    - Instruções de execução do workflow
+   ```bash
+   # Instale o PostgreSQL ou use Docker:
+   docker run -d --name postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_USER=postgres -e POSTGRES_DB=imoveis -p 5432:5432 postgres:14
+   ```
 
----
+2. Configure a API:
 
-Boa sorte! 🚀
+   ```bash
+   cd api
+   npm install
+   cp .env.example .env
+   # Edite o arquivo .env conforme necessário
+   npm run start:dev
+   ```
+
+3. Configure o N8N:
+
+   ```bash
+   npm install -g n8n
+   n8n start
+   ```
+
+4. Importe o workflow:
+   - Acesse http://localhost:5678
+   - Vá para "Workflows" > "Import from File"
+   - Selecione o arquivo `n8n-workflow/imobiliaria-chatbot.json`
+
+## Instruções para Teste do Chatbot
+
+1. Inicie a conversa com o chatbot no N8N
+2. Informe suas preferências, por exemplo:
+   - "Estou procurando um apartamento até R$ 400 mil"
+   - "Quero uma casa entre R$ 300 mil e R$ 600 mil"
+   - "Procuro uma kitnet de no máximo R$ 150 mil"
+3. O chatbot consultará a API e retornará os imóveis que correspondem aos critérios
+
+## Recursos Adicionais
+
+- Documentação da API: http://localhost:3024/api
+- Interface do N8N: http://localhost:5678

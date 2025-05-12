@@ -1,0 +1,805 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Imóveis Premium - Assistente Virtual</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      :root {
+        --primary-color: #2c3e50;
+        --primary-light: #34495e;
+        --accent-color: #e67e22;
+        --accent-light: #f39c12;
+        --text-light: #ecf0f1;
+        --text-dark: #2c3e50;
+        --background-color: #f5f7fa;
+        --card-color: #ffffff;
+        --success-color: #27ae60;
+        --border-radius: 10px;
+        --shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          "Montserrat", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--background-color);
+        background-image: url("https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1973&q=80");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+        position: relative;
+      }
+
+      body::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        z-index: 0;
+      }
+
+      .app-container {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: 1000px;
+        display: flex;
+        flex-direction: column;
+        background-color: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        height: 85vh;
+      }
+
+      .app-header {
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--primary-light)
+        );
+        color: var(--text-light);
+        padding: 20px 30px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .app-title {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .app-title h1 {
+        font-size: 24px;
+        font-weight: 600;
+      }
+
+      .app-logo {
+        width: 40px;
+        height: 40px;
+        background-color: var(--accent-color);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+      }
+
+      .app-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+      }
+
+      .status-dot {
+        width: 10px;
+        height: 10px;
+        background-color: var(--success-color);
+        border-radius: 50%;
+      }
+
+      .app-content {
+        display: flex;
+        height: calc(100% - 80px);
+      }
+
+      .sidebar {
+        width: 280px;
+        background-color: #f8f9fa;
+        border-right: 1px solid #e9ecef;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .sidebar-title {
+        font-size: 18px;
+        color: var(--primary-color);
+        margin-bottom: 15px;
+        font-weight: 600;
+      }
+
+      .feature-list {
+        list-style: none;
+        margin-bottom: 30px;
+      }
+
+      .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 0;
+        color: var(--primary-light);
+        border-bottom: 1px solid #e9ecef;
+      }
+
+      .feature-icon {
+        width: 32px;
+        height: 32px;
+        background-color: rgba(44, 62, 80, 0.1);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-color);
+      }
+
+      .testimonial {
+        margin-top: auto;
+        background-color: #fff;
+        border-radius: 12px;
+        padding: 15px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      }
+
+      .testimonial-text {
+        font-style: italic;
+        font-size: 14px;
+        color: #555;
+        margin-bottom: 10px;
+      }
+
+      .testimonial-author {
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--primary-color);
+      }
+
+      .chat-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+      }
+
+      .chat-messages {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        background-color: #fff;
+      }
+
+      .message {
+        margin-bottom: 20px;
+        max-width: 80%;
+        animation: fadeIn 0.3s ease-in-out;
+      }
+
+      .user-message {
+        margin-left: auto;
+      }
+
+      .bot-message {
+        margin-right: auto;
+      }
+
+      .message-bubble {
+        padding: 15px;
+        border-radius: 18px;
+        position: relative;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      }
+
+      .user-message .message-bubble {
+        background-color: var(--accent-color);
+        color: white;
+        border-bottom-right-radius: 4px;
+      }
+
+      .bot-message .message-bubble {
+        background-color: #f1f1f1;
+        color: var(--text-dark);
+        border-bottom-left-radius: 4px;
+      }
+
+      .message-time {
+        font-size: 12px;
+        color: #888;
+        margin-top: 5px;
+        display: block;
+      }
+
+      .user-message .message-time {
+        text-align: right;
+      }
+
+      .property-card {
+        background-color: white;
+        border-radius: 12px;
+        margin-top: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border: 1px solid #eee;
+      }
+
+      .property-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 15px;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #eee;
+      }
+
+      .property-title {
+        font-weight: 600;
+        color: var(--primary-color);
+      }
+
+      .property-id {
+        font-size: 12px;
+        color: #888;
+        background-color: #e9ecef;
+        padding: 3px 8px;
+        border-radius: 12px;
+      }
+
+      .property-content {
+        padding: 15px;
+      }
+
+      .property-price {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--accent-color);
+        margin-bottom: 10px;
+      }
+
+      .property-details {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 10px;
+      }
+
+      .property-detail {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 14px;
+        color: #555;
+      }
+
+      .property-location {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 14px;
+        color: #555;
+      }
+
+      .property-footer {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 15px;
+        background-color: #f8f9fa;
+        border-top: 1px solid #eee;
+      }
+
+      .property-action {
+        font-size: 13px;
+        color: var(--primary-color);
+        background: none;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .property-action:hover {
+        color: var(--accent-color);
+      }
+
+      .chat-input-container {
+        padding: 15px 20px;
+        background-color: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .chat-input {
+        flex: 1;
+        padding: 14px;
+        border-radius: 30px;
+        border: 1px solid #ddd;
+        outline: none;
+        font-size: 15px;
+        background-color: white;
+        transition: all 0.2s;
+      }
+
+      .chat-input:focus {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 2px rgba(230, 126, 34, 0.2);
+      }
+
+      .send-button {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(
+          135deg,
+          var(--accent-color),
+          var(--accent-light)
+        );
+        color: white;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: transform 0.2s;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .send-button:hover {
+        transform: scale(1.05);
+      }
+
+      .send-button:active {
+        transform: scale(0.95);
+      }
+
+      .loading-indicator {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #888;
+        padding: 10px;
+      }
+
+      .loading-dots {
+        display: flex;
+        align-items: center;
+      }
+
+      .loading-dots span {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: var(--accent-color);
+        margin: 0 3px;
+        opacity: 0.6;
+        animation: bounce 1.4s infinite ease-in-out both;
+      }
+
+      .loading-dots span:nth-child(1) {
+        animation-delay: -0.32s;
+      }
+
+      .loading-dots span:nth-child(2) {
+        animation-delay: -0.16s;
+      }
+
+      @keyframes bounce {
+        0%,
+        80%,
+        100% {
+          transform: scale(0);
+        }
+        40% {
+          transform: scale(1);
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .suggestions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 15px;
+      }
+
+      .suggestion-chip {
+        background-color: #f1f1f1;
+        color: var(--primary-color);
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        padding: 8px 15px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .suggestion-chip:hover {
+        background-color: var(--accent-light);
+        color: white;
+        border-color: var(--accent-light);
+      }
+
+      .welcome-message {
+        text-align: center;
+        padding: 30px;
+        margin: 20px auto;
+        max-width: 80%;
+        background-color: rgba(44, 62, 80, 0.05);
+        border-radius: 20px;
+        border: 1px dashed #ccc;
+      }
+
+      .welcome-title {
+        color: var(--primary-color);
+        font-size: 22px;
+        margin-bottom: 15px;
+      }
+
+      .welcome-text {
+        color: #555;
+        margin-bottom: 20px;
+        line-height: 1.5;
+      }
+
+      @media (max-width: 900px) {
+        .sidebar {
+          display: none;
+        }
+
+        .app-container {
+          height: 90vh;
+        }
+      }
+
+      @media (max-width: 600px) {
+        .app-container {
+          border-radius: 0;
+          height: 100vh;
+          max-width: 100%;
+        }
+
+        .app-header {
+          padding: 15px;
+        }
+
+        .app-title h1 {
+          font-size: 18px;
+        }
+
+        .property-details {
+          flex-wrap: wrap;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-container">
+      <header class="app-header">
+        <div class="app-title">
+          <div class="app-logo">
+            <i class="fas fa-home"></i>
+          </div>
+          <h1>Imóveis Premium</h1>
+        </div>
+        <div class="app-status">
+          <div class="status-dot"></div>
+          <span>Assistente online</span>
+        </div>
+      </header>
+
+      <div class="app-content">
+        <aside class="sidebar">
+          <h3 class="sidebar-title">Nossos serviços</h3>
+          <ul class="feature-list">
+            <li class="feature-item">
+              <div class="feature-icon">
+                <i class="fas fa-search"></i>
+              </div>
+              <span>Busca inteligente de imóveis</span>
+            </li>
+            <li class="feature-item">
+              <div class="feature-icon">
+                <i class="fas fa-map-marker-alt"></i>
+              </div>
+              <span>Localização privilegiada</span>
+            </li>
+            <li class="feature-item">
+              <div class="feature-icon">
+                <i class="fas fa-dollar-sign"></i>
+              </div>
+              <span>Financiamento facilitado</span>
+            </li>
+            <li class="feature-item">
+              <div class="feature-icon">
+                <i class="fas fa-calendar-check"></i>
+              </div>
+              <span>Agendamento de visitas</span>
+            </li>
+          </ul>
+
+          <div class="testimonial">
+            <p class="testimonial-text">
+              "Encontrei meu apartamento dos sonhos em menos de uma semana
+              graças ao atendimento personalizado!"
+            </p>
+            <p class="testimonial-author">— Maria Silva</p>
+          </div>
+        </aside>
+
+        <div class="chat-container">
+          <div class="chat-messages" id="chatMessages">
+            <!-- Mensagens serão inseridas aqui -->
+          </div>
+
+          <div class="chat-input-container">
+            <input
+              type="text"
+              id="userInput"
+              class="chat-input"
+              placeholder="Digite sua busca de imóveis..."
+              onkeypress="handleKeyPress(event)"
+            />
+            <button class="send-button" id="sendButton" onclick="sendMessage()">
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const chatMessages = document.getElementById("chatMessages");
+      const userInput = document.getElementById("userInput");
+      const sendButton = document.getElementById("sendButton");
+
+      function formatTime() {
+        const now = new Date();
+        return now.toLocaleTimeString("pt-BR", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
+
+      window.onload = function () {
+        const welcomeHtml = `
+          <div class="welcome-message">
+            <h3 class="welcome-title">👋 Bem-vindo à Imóveis Premium</h3>
+            <p class="welcome-text">Sou seu assistente virtual especializado em encontrar o imóvel perfeito para você. Como posso ajudar hoje?</p>
+            <div class="suggestions">
+              <div class="suggestion-chip" onclick="useExample('Quero apartamentos até 400 mil')">Apartamentos até 400 mil</div>
+              <div class="suggestion-chip" onclick="useExample('Casas com 3 quartos')">Casas com 3 quartos</div>
+              <div class="suggestion-chip" onclick="useExample('Imóveis no centro')">Imóveis no centro</div>
+            </div>
+          </div>
+        `;
+        chatMessages.innerHTML = welcomeHtml;
+      };
+
+      function useExample(text) {
+        userInput.value = text;
+        sendMessage();
+      }
+
+      function handleKeyPress(event) {
+        if (event.key === "Enter") {
+          sendMessage();
+        }
+      }
+
+      function addUserMessage(text) {
+        const messageDiv = document.createElement("div");
+        messageDiv.className = "message user-message";
+        messageDiv.innerHTML = `
+          <div class="message-bubble">${text}</div>
+          <span class="message-time">${formatTime()}</span>
+        `;
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      function addBotMessage(text) {
+        const messageDiv = document.createElement("div");
+        messageDiv.className = "message bot-message";
+        // Markdown simples
+        text = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+        text = text.replace(/\*(.*?)\*/g, "<em>$1</em>");
+        text = text.replace(/\n/g, "<br>");
+        messageDiv.innerHTML = `
+          <div class="message-bubble">${text}</div>
+          <span class="message-time">${formatTime()}</span>
+        `;
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      function addPropertyCards(properties) {
+        const messageDiv = document.createElement("div");
+        messageDiv.className = "message bot-message";
+        let cardsHtml = `
+          <div class="message-bubble">
+            <p>Encontrei ${properties.length} imóveis para você:</p>
+        `;
+        properties.forEach((property, index) => {
+          if (index < 5) {
+            cardsHtml += `
+              <div class="property-card">
+                <div class="property-header">
+                  <div class="property-title">${property.titulo || property.title || property.tipo || "Imóvel"}</div>
+                  <div class="property-id">ID: ${property.id || index + 1}</div>
+                </div>
+                <div class="property-content">
+                  <div class="property-price">R$ ${Number(property.preco || property.price || 0).toLocaleString("pt-BR")}</div>
+                  <div class="property-details">
+                    <div class="property-detail">
+                      <i class="fas fa-home"></i> ${property.tipo || property.type || "Não especificado"}
+                    </div>
+                    <div class="property-detail">
+                      <i class="fas fa-bed"></i> ${property.quartos || property.bedrooms || "0"} quartos
+                    </div>
+                    <div class="property-detail">
+                      <i class="fas fa-ruler-combined"></i> ${property.area || property.size || "0"}m²
+                    </div>
+                  </div>
+                  <div class="property-location">
+                    <i class="fas fa-map-marker-alt"></i> ${property.localizacao || property.address || property.bairro || "Localização não especificada"}
+                  </div>
+                </div>
+                <div class="property-footer">
+                  <button class="property-action">
+                    <i class="fas fa-info-circle"></i> Mais detalhes
+                  </button>
+                  <button class="property-action">
+                    <i class="fas fa-calendar-alt"></i> Agendar visita
+                  </button>
+                </div>
+              </div>
+            `;
+          }
+        });
+        if (properties.length > 5) {
+          cardsHtml += `<p style="margin-top: 15px;">E mais ${properties.length - 5} imóveis encontrados.</p>`;
+        }
+        cardsHtml += `</div>`;
+        messageDiv.innerHTML =
+          cardsHtml + `<span class="message-time">${formatTime()}</span>`;
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      function showLoading() {
+        const loadingDiv = document.createElement("div");
+        loadingDiv.className = "message bot-message";
+        loadingDiv.id = "loadingMessage";
+        loadingDiv.innerHTML = `
+          <div class="message-bubble loading-indicator">
+            <span>Buscando imóveis</span>
+            <div class="loading-dots">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        `;
+        chatMessages.appendChild(loadingDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      function hideLoading() {
+        const loadingMessage = document.getElementById("loadingMessage");
+        if (loadingMessage) {
+          loadingMessage.remove();
+        }
+      }
+
+      async function sendMessage() {
+        const message = userInput.value.trim();
+        if (!message) return;
+
+        userInput.disabled = true;
+        sendButton.disabled = true;
+        addUserMessage(message);
+        userInput.value = "";
+        showLoading();
+
+        try {
+          const res = await fetch("http://localhost:5678/webhook-imoveis", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ mensagem: message }),
+          });
+
+          hideLoading();
+
+          if (!res.ok) {
+            throw new Error(`Erro ${res.status}: ${res.statusText}`);
+          }
+
+          const contentType = res.headers.get("content-type");
+          let data;
+          if (contentType && contentType.includes("application/json")) {
+            data = await res.json();
+          } else {
+            data = await res.text();
+          }
+
+          // Trata resposta do backend n8n
+          if (typeof data === "string") {
+            addBotMessage(data);
+          } else if (data && typeof data === "object") {
+            // Se vier campo resposta, exibe como mensagem
+            if (data.resposta) {
+              addBotMessage(data.resposta);
+            }
+            // Se vier array de imóveis
+            else if (Array.isArray(data)) {
+              addPropertyCards(data);
+            }
+            // Se vier campos de imóvel direto
+            else if (data.length && data[0]?.title) {
+              addPropertyCards(data);
+            }
+            // Resposta fallback
+            else {
+              addBotMessage(JSON.stringify(data, null, 2));
+            }
+          } else {
+            addBotMessage("❌ Não foi possível interpretar a resposta.");
+          }
+        } catch (error) {
+          hideLoading();
+          addBotMessage(
+            `❌ Ocorreu um erro na busca: ${error.message}. Por favor, tente novamente mais tarde.`
+          );
+        } finally {
+          userInput.disabled = false;
+          sendButton.disabled = false;
+          userInput.focus();
+        }
+      }
+    </script>
+  </body>
+</html>

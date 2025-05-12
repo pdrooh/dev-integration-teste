@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+  api:
+    build: ./api
+    ports:
+      - "3024:3024"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - DB_DATABASE=imoveis
+      - DB_SYNCHRONIZE=true
+    depends_on:
+      - postgres
+    volumes:
+      - ./api:/app
+      - /app/node_modules
+
+  postgres:
+    image: postgres:14
+    ports:
+      - "5424:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=imoveis
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  n8n:
+    image: n8nio/n8n
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=n8n
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - NODE_ENV=production
+      - WEBHOOK_URL=http://localhost:5678/
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+volumes:
+  postgres_data:
+  n8n_data:
