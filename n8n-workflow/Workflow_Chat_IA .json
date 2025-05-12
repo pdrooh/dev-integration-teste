@@ -1,21 +1,6 @@
 {
-  "name": "Workflow Chat IA",
+  "name": "My workflow",
   "nodes": [
-    {
-      "parameters": {
-        "httpMethod": "POST",
-        "path": "webhook-imoveis",
-        "options": {
-          "responseData": "allEntries"
-        }
-      },
-      "id": "c6d9c325-0328-491a-be35-b39da1b8ddda",
-      "name": "Webhook",
-      "type": "n8n-nodes-base.webhook",
-      "position": [260, 20],
-      "typeVersion": 2,
-      "webhookId": "ee160f11-fded-4789-8876-b7baff9efa85"
-    },
     {
       "parameters": {
         "method": "POST",
@@ -31,60 +16,81 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"model\": \"llama-3.1-8b-instant\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": {{$json[\"mensagem\"]}}\n    }\n  ]\n}",
+        "jsonBody": "={\n  \"model\": \"llama-3.1-8b-instant\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Você é um assistente que ajuda usuários a encontrar imóveis. Sempre responda com um JSON contendo os campos: tipo, min, max, cidade, bairro, quartos, etc, conforme solicitado pelo usuário. Se algum campo não for mencionado, deixe em branco ou omita.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"{{$json['mensagem']}}\"\n    }\n  ]\n}\n",
         "options": {}
       },
-      "id": "a8505efc-8e5b-484a-bd50-e1e337f11ab4",
+      "id": "c63f26f4-d060-4f27-8d98-1d84394ff124",
       "name": "Processar com IA",
       "type": "n8n-nodes-base.httpRequest",
-      "position": [460, 20],
+      "position": [920, 380],
       "typeVersion": 4.2
     },
     {
       "parameters": {
         "jsCode": "// Parse da resposta da IA\n// Supondo que a resposta vem em item.json.choices[0].message.content\nconst resposta = $json.choices[0].message.content;\nlet filtros = {};\ntry {\n  filtros = JSON.parse(resposta);\n} catch (e) {\n  // fallback: tenta extrair com regex se não vier JSON\n}\nconst params = [];\nif (filtros.tipo) params.push(`type=${encodeURIComponent(filtros.tipo)}`);\nif (filtros.min) params.push(`minPrice=${filtros.min}`);\nif (filtros.max) params.push(`maxPrice=${filtros.max}`);\nconst query = params.length ? `?${params.join('&')}` : '';\nreturn [{ json: { query, filtros } }];"
       },
-      "id": "97442e2b-f0cb-4833-86c4-33f40ce53cfc",
+      "id": "6eb54975-f956-4989-8d2a-0c7284ec8658",
       "name": "Preparar Parâmetros",
       "type": "n8n-nodes-base.code",
-      "position": [660, 20],
+      "position": [1120, 380],
       "typeVersion": 2
     },
     {
       "parameters": {
-        "url": "http://localhost:3024/properties{{$json[\"query\"]}}",
+        "url": "http://192.168.1.36:3024/properties",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "minPrice",
+              "value": "={{$json[\"minPrice\"]}}"
+            },
+            {
+              "name": "maxPrice",
+              "value": "={{$json[\"maxPrice\"]}}"
+            },
+            {
+              "name": "type",
+              "value": "={{$json[\"type\"]}}"
+            }
+          ]
+        },
         "options": {}
       },
-      "id": "7fc9abe9-8145-4b86-91a9-3bec07ef1a88",
+      "id": "57328a59-529e-4168-a9ed-54e527a931de",
       "name": "Buscar Imóveis",
       "type": "n8n-nodes-base.httpRequest",
-      "position": [860, 20],
+      "position": [1320, 380],
       "typeVersion": 4.2
     },
     {
       "parameters": {
         "jsCode": "// Espera array de imóveis em item.json\nconst imoveis = $json;\nif (!Array.isArray(imoveis) || imoveis.length === 0) {\n  return [{ json: { resposta: 'Nenhum imóvel encontrado com os filtros informados.' } }];\n}\nconst resposta = imoveis.map(imovel =>\n  `🏠 ${imovel.title}\\n📍 ${imovel.address}\\n💵 R$ ${imovel.price}\\n🏷️ ${imovel.type}`\n).join('\\n\\n');\nreturn [{ json: { resposta } }];"
       },
-      "id": "01d8cabf-cb15-422d-8689-29b11efc6dcb",
+      "id": "573ef5cc-3e03-4c03-976e-3b33c4fb5edb",
       "name": "Formatar Resposta",
       "type": "n8n-nodes-base.code",
-      "position": [1060, 20],
+      "position": [1520, 380],
       "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "webhook-imoveis",
+        "options": {
+          "responseData": "allEntries"
+        }
+      },
+      "id": "9951a025-8ff4-40d2-9c3e-8aa1840134ae",
+      "name": "Webhook1",
+      "type": "n8n-nodes-base.webhook",
+      "position": [720, 380],
+      "typeVersion": 2,
+      "webhookId": "ee160f11-fded-4789-8876-b7baff9efa85"
     }
   ],
   "pinData": {},
   "connections": {
-    "Webhook": {
-      "main": [
-        [
-          {
-            "node": "Processar com IA",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Processar com IA": {
       "main": [
         [
@@ -117,17 +123,28 @@
           }
         ]
       ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Processar com IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "bc0701f5-4fbd-4dc1-b157-93778ec52033",
+  "versionId": "873586b0-a1ef-4195-9391-d88394887366",
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "8e42d0d387dd00641c2cea3eee7a0d9cdad45bfacb811bddc4d613eccffbabc8"
+    "instanceId": "bc5ecc0f04fe4bdfcd4b88e6b86c91c6dc7b71be17af2082c0afb34cc53cdf1d"
   },
-  "id": "4A3Z2na4l5FiObzl",
+  "id": "kcX55DIASRiNEzk2",
   "tags": []
 }

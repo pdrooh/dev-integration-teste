@@ -744,13 +744,16 @@
         showLoading();
 
         try {
-          const res = await fetch("http://localhost:5678/webhook-imoveis", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ mensagem: message }),
-          });
+          const res = await fetch(
+            "http://localhost:5678/webhook-test/webhook-imoveis",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ mensagem: message }),
+            }
+          );
 
           hideLoading();
 
@@ -767,23 +770,18 @@
           }
 
           // Trata resposta do backend n8n
-          if (typeof data === "string") {
+          if (
+            Array.isArray(data) &&
+            data.length &&
+            (data[0].nome || data[0].title || data[0].tipo || data[0].type)
+          ) {
+            addPropertyCards(data);
+          } else if (typeof data === "string") {
             addBotMessage(data);
           } else if (data && typeof data === "object") {
-            // Se vier campo resposta, exibe como mensagem
             if (data.resposta) {
               addBotMessage(data.resposta);
-            }
-            // Se vier array de imóveis
-            else if (Array.isArray(data)) {
-              addPropertyCards(data);
-            }
-            // Se vier campos de imóvel direto
-            else if (data.length && data[0]?.title) {
-              addPropertyCards(data);
-            }
-            // Resposta fallback
-            else {
+            } else {
               addBotMessage(JSON.stringify(data, null, 2));
             }
           } else {
